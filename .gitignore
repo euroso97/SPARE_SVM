@@ -1,0 +1,3 @@
+build/
+svmtrainer.egg-info/
+*.joblib
