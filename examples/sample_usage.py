@@ -10,11 +10,17 @@ from svmtrainer import SVMModel #, load_tabular_data # Uncomment if you use it
 
 def run_example():
     # --- Option 1: Generate sample data ---
-    print("Generating sample classification data...")
-    X_data, y_data = make_classification(n_samples=4000, n_features=145, n_informative=5,
-                                         n_redundant=2, n_classes=2, random_state=42)
-    features_df = pd.DataFrame(X_data, columns=[f'feature_{i}' for i in range(X_data.shape[1])])
-    labels_series = pd.Series(y_data, name='target')
+    # print("Generating sample classification data...")
+    # X_data, y_data = make_classification(n_samples=2000, n_features=15, n_informative=5,
+    #                                      n_redundant=2, n_classes=2, random_state=42)
+    # features_df = pd.DataFrame(X_data, columns=[f'feature_{i}' for i in range(X_data.shape[1])])
+    # labels_series = pd.Series(y_data, name='target')
+
+    df_SM = pd.read_csv('/home/kylebaik/Test_Projects/NiChart_Paper_SPARE_Experiments/lists/SPARE-SM-Harmonized.csv').drop(['MRID','PTID','Study','SITE','Race','Sex_M','Smoking_Calc'],axis=1).rename(columns={'Smoking_Calc_Binarized':'Smoking_Calc'})
+    df_SM.Sex = df_SM.Sex.apply(lambda x: 1 if 'M' else 0)
+    labels_series = df_SM['Smoking_Calc'].to_numpy()
+    features_df = df_SM.drop('Smoking_Calc',axis=1).to_numpy()
+
 
     # Split data
     X_train, X_test, y_train, y_test = train_test_split(
@@ -44,8 +50,8 @@ def run_example():
 
 
     # Initialize the SVMModel with hyperparameter tuning for RBF kernel
-    print("\n--- RBF Kernel SVM with Hyperparameter Tuning ---")
-    svm_trainer_rbf = SVMModel(kernel='linear', tune_hyperparameters=True, cv_folds=5, random_state=42)
+    print("\n--- linear SVM with Hyperparameter Tuning ---")
+    svm_trainer_rbf = SVMModel(kernel='linear', tune_hyperparameters=False, cv_folds=5, random_state=42)
 
     # Train the model
     print("Training RBF SVM model...")

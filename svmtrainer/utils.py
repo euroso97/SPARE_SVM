@@ -2,10 +2,10 @@
 # This file can be used for utility functions.
 # For example, loading data from specific file formats,
 # or more complex preprocessing steps.
-
+import numpy as np
 import pandas as pd
 
-def load_tabular_data(filepath, label_column_name):
+def load_tabular_data(filepath, label_column_name, ignore_columns=[]):
     """
     Loads tabular data from a CSV file.
 
@@ -25,6 +25,9 @@ def load_tabular_data(filepath, label_column_name):
     except Exception as e:
         raise Exception(f"Error reading CSV file: {e}")
 
+    if ignore_columns != []:
+        data_df = data_df.drop(ignore_columns,axis=1)
+        
     if label_column_name not in data_df.columns:
         raise ValueError(f"Label column '{label_column_name}' not found in the CSV file.")
 
@@ -32,3 +35,6 @@ def load_tabular_data(filepath, label_column_name):
     features_df = data_df.drop(columns=[label_column_name])
 
     return features_df, labels_series
+
+def expspace(span: list) -> np.ndarray:
+    return np.exp(np.linspace(span[0], span[1], num=int(span[1]) - int(span[0]) + 1))

@@ -102,7 +102,7 @@ class SVMModel:
             print("Hyperparameter tuning complete. Model trained with best parameters.")
         else:
             print(f"Training SVM model with kernel='{self.kernel}', C={self.C}, gamma='{self.gamma}', degree={self.degree}...")
-            svm_params = {'random_state': self.random_state, 'probability': True}
+            svm_params = {'random_state': self.random_state, 'probability': True, 'class_weight' : 'balanced'}
             if self.kernel == 'linear':
                 svm_params.update({'kernel': 'linear', 'C': self.C})
             elif self.kernel == 'rbf':

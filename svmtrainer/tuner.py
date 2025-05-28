@@ -4,6 +4,8 @@ from sklearn.model_selection import GridSearchCV, KFold
 from sklearn.svm import SVC
 from sklearn.metrics import accuracy_score # Or other relevant metrics
 
+from .utils import expspace
+
 def tune_svm_hyperparameters(X, y, kernel='rbf', cv_folds=5, random_state=None):
     """
     Performs 5-fold cross-validation and hyperparameter tuning for an SVM model.
@@ -23,17 +25,15 @@ def tune_svm_hyperparameters(X, y, kernel='rbf', cv_folds=5, random_state=None):
     """
     param_grid = {}
     if kernel == 'linear':
-        param_grid = {
-            'C': [0.1, 1, 10, 100]
-        }
+        param_grid = {"C": expspace([0, 3])}
     elif kernel == 'rbf':
         param_grid = {
-            'C': [0.1, 1, 10, 100],
+            'C': [0.1, 1, 10],
             'gamma': [0.001, 0.01, 0.1, 1, 'scale', 'auto']
         }
     elif kernel == 'poly':
         param_grid = {
-            'C': [0.1, 1, 10, 100],
+            'C': [0.1, 1, 10],
             'degree': [2, 3, 4],
             'gamma': [0.001, 0.01, 0.1, 'scale', 'auto'],
             'coef0': [0.0, 0.1, 0.5, 1.0] # Independent term in kernel function
@@ -41,7 +41,7 @@ def tune_svm_hyperparameters(X, y, kernel='rbf', cv_folds=5, random_state=None):
     else:
         raise ValueError(f"Unsupported kernel: {kernel}. Choose from 'linear', 'rbf', 'poly'.")
 
-    svc = SVC(kernel=kernel, random_state=random_state, probability=True) # probability=True for predict_proba if needed
+    svc = SVC(kernel=kernel, random_state=random_state, probability=True, class_weight='balanced') # probability=True for predict_proba if needed
 
     # Define cross-validation strategy
     cv = KFold(n_splits=cv_folds, shuffle=True, random_state=random_state)
