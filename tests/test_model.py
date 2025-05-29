@@ -3,7 +3,7 @@ import unittest
 import pandas as pd
 import numpy as np
 from sklearn.datasets import make_classification
-from svmtrainer import SVMModel # Assuming svmtrainer is in PYTHONPATH or installed
+from sparesvm import SVMModel # Assuming svmtrainer is in PYTHONPATH or installed
 
 class TestSVMModel(unittest.TestCase):
 

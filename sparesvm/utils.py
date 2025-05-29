@@ -1,4 +1,3 @@
-# svmtrainer_project/svmtrainer/utils.py
 # This file can be used for utility functions.
 # For example, loading data from specific file formats,
 # or more complex preprocessing steps.

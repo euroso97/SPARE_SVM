@@ -1,6 +1,4 @@
-# svmtrainer_project/README.md
-
-# SVM Trainer (`svmtrainer`)
+# SPARE_SVM (`sparesvm`)
 
 A Python package for easily training Support Vector Machine (SVM) models for classification tasks.
 It supports linear, RBF, and polynomial kernels, and includes features for 5-fold

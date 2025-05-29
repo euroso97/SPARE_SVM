@@ -1,4 +1,4 @@
-# svmtrainer_project/setup.py
+# sparesvm_project/setup.py
 from setuptools import setup, find_packages
 
 # Read the contents of your README file
@@ -11,15 +11,15 @@ with open('requirements.txt') as f:
     required = f.read().splitlines()
 
 setup(
-    name='svmtrainer',
+    name='sparesvm',
     version='0.1.1', # Increment version for updates
-    author='<Your Name or Organization>',
+    author='Kyunglok Baik',
     author_email='<your.email@example.com>',
     description='A Python package for training SVM models with hyperparameter tuning.',
     long_description=long_description,
     long_description_content_type='text/markdown',
     url='<URL to your package repository, e.g., GitHub>', # Optional
-    packages=find_packages(exclude=['tests*', 'examples*']), # find_packages() automatically finds your 'svmtrainer' package
+    packages=find_packages(exclude=['tests*', 'examples*']), # find_packages() automatically finds your 'sparesvm' package
     install_requires=required,
     classifiers=[
         'Development Status :: 3 - Alpha', # Or '4 - Beta', '5 - Production/Stable'
@@ -39,7 +39,6 @@ setup(
     python_requires='>=3.8', # Specify your minimum Python version
     keywords='svm machine-learning scikit-learn cross-validation hyperparameter-tuning',
     project_urls={ # Optional
-        'Bug Reports': '<URL to your issue tracker>',
         'Source': '<URL to your source code>',
     },
 )

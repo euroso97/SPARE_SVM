@@ -1,4 +1,3 @@
-# svmtrainer_project/svmtrainer/tuner.py
 import numpy as np
 from sklearn.model_selection import GridSearchCV, KFold
 from sklearn.svm import SVC

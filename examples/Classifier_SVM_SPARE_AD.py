@@ -5,7 +5,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score, classification_report
 
 # Assuming your package is installed or the svmtrainer_project directory is in PYTHONPATH
-from svmtrainer import SVMModel, load_tabular_data #, load_tabular_data # Uncomment if you use it
+from sparesvm import SVMModel, load_tabular_data #, load_tabular_data # Uncomment if you use it
 
 def run_spare_ad_train():
 
