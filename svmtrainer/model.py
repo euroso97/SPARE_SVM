@@ -94,12 +94,13 @@ class SVMModel:
         if self.tune_hyperparameters:
             print(f"Starting hyperparameter tuning for {self.kernel} kernel...")
             best_model, best_params, best_score = tune_svm_hyperparameters(
-                X_scaled, y, kernel=self.kernel, cv_folds=self.cv_folds, random_state=self.random_state
+                X_scaled, y, kernel = self.kernel, cv_folds=self.cv_folds, random_state=self.random_state
             )
             self.model = best_model
             self.best_params_ = best_params
             self.best_cv_score_ = best_score
             print("Hyperparameter tuning complete. Model trained with best parameters.")
+        
         else:
             print(f"Training SVM model with kernel='{self.kernel}', C={self.C}, gamma='{self.gamma}', degree={self.degree}...")
             svm_params = {'random_state': self.random_state, 'probability': True, 'class_weight' : 'balanced'}

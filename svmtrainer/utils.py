@@ -5,6 +5,7 @@
 import numpy as np
 import pandas as pd
 
+
 def load_tabular_data(filepath, label_column_name, ignore_columns=[]):
     """
     Loads tabular data from a CSV file.
@@ -34,7 +35,10 @@ def load_tabular_data(filepath, label_column_name, ignore_columns=[]):
     labels_series = data_df[label_column_name]
     features_df = data_df.drop(columns=[label_column_name])
 
+
     return features_df, labels_series
+
+
 
 def expspace(span: list) -> np.ndarray:
     return np.exp(np.linspace(span[0], span[1], num=int(span[1]) - int(span[0]) + 1))

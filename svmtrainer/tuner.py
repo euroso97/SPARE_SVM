@@ -25,7 +25,7 @@ def tune_svm_hyperparameters(X, y, kernel='rbf', cv_folds=5, random_state=None):
     """
     param_grid = {}
     if kernel == 'linear':
-        param_grid = {"C": expspace([0, 3])}
+        param_grid = {"C": expspace([-9, 3])}
     elif kernel == 'rbf':
         param_grid = {
             'C': [0.1, 1, 10],
@@ -41,15 +41,22 @@ def tune_svm_hyperparameters(X, y, kernel='rbf', cv_folds=5, random_state=None):
     else:
         raise ValueError(f"Unsupported kernel: {kernel}. Choose from 'linear', 'rbf', 'poly'.")
 
-    svc = SVC(kernel=kernel, random_state=random_state, probability=True, class_weight='balanced') # probability=True for predict_proba if needed
+    svc = SVC(kernel=kernel, 
+              random_state=random_state, 
+              probability=True, 
+              class_weight='balanced') # probability=True for predict_proba if needed
 
     # Define cross-validation strategy
     cv = KFold(n_splits=cv_folds, shuffle=True, random_state=random_state)
 
     # Setup GridSearchCV
     # Scoring can be 'accuracy', 'f1', 'roc_auc', etc. depending on the problem
-    grid_search = GridSearchCV(estimator=svc, param_grid=param_grid, cv=cv,
-                               scoring='accuracy', verbose=1, n_jobs=-1) # n_jobs=-1 uses all available cores
+    grid_search = GridSearchCV(estimator=svc, 
+                               param_grid=param_grid, 
+                               cv=cv,
+                               scoring='roc_auc_ovr_weighted', 
+                               verbose=3, 
+                               n_jobs=-1) # n_jobs=-1 uses all available cores
 
     # Fit GridSearchCV
     grid_search.fit(X, y)
