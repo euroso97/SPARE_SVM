@@ -5,7 +5,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score, classification_report
 
 # Assuming your package is installed or the svmtrainer_project directory is in PYTHONPATH
-from sparesvm import SVMModel, load_tabular_data #, load_tabular_data # Uncomment if you use it
+from sparesvm import SVMTrainer, load_tabular_data #, load_tabular_data # Uncomment if you use it
 
 def run_spare_ad_train():
 
@@ -29,8 +29,7 @@ def run_spare_ad_train():
         print(f"Could not run CSV loading example: {e}")
 
     # Example with a linear kernel and tuning
-    print("\n--- Linear Kernel SVM without Hyperparameter Tuning ---")
-    svm_trainer_linear = SVMModel(kernel='linear', tune_hyperparameters=True, random_state=42)
+    svm_trainer_linear = SVMTrainer(task = 'classification', kernel='linear', tune_hyperparameters=True, random_state=42)
     print("Training Linear SVM model...")
     svm_trainer_linear.train(X_train, y_train)
     

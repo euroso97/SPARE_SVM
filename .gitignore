@@ -1,3 +1,4 @@
 build/
 svmtrainer.egg-info/
+sparesvm.egg-info/
 *.joblib

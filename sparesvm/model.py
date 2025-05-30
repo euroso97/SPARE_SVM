@@ -1,18 +1,20 @@
 import pandas as pd
 import numpy as np
-from sklearn.svm import SVC
+from sklearn.svm import LinearSVR, SVR, SVC
 from sklearn.preprocessing import StandardScaler
-from sklearn.pipeline import Pipeline
-from .tuner import tune_svm_hyperparameters
+# from sklearn.pipeline import Pipeline
+from .tuner import tune_svm_regressor_hyperparameters, tune_svm_classifier_hyperparameters
 
-class SVMModel:
+class SVMTrainer:
     """
     A class to train Support Vector Machine (SVM) models with various kernels,
     including hyperparameter tuning and cross-validation.
     """
     def __init__(self, 
-                 kernel='rbf', 
-                 C=1.0, gamma='scale', 
+                 task='classification',
+                 kernel='linear', 
+                 C=1.0, 
+                 gamma='scale', 
                  degree=3, 
                  coef0=0.0,
                  tune_hyperparameters=False, 
@@ -20,9 +22,10 @@ class SVMModel:
                  random_state=None, 
                  scale_features=True):
         """
-        Initializes the SVMModel.
+        Initializes the SVM_Classifier.
 
         Args:
+            task (str): Type of task to be performed ('classification', 'regression')
             kernel (str): Type of SVM kernel ('linear', 'rbf', 'poly').
             C (float): Regularization parameter.
             gamma (str or float): Kernel coefficient for 'rbf' and 'poly'.
@@ -33,9 +36,13 @@ class SVMModel:
             random_state (int, optional): Random seed for reproducibility.
             scale_features (bool): Whether to apply StandardScaler to features.
         """
+        if task not in ['classification', 'regression']:
+            raise ValueError("Task must be one of 'classification' or 'regression'")
+
         if kernel not in ['linear', 'rbf', 'poly']:
             raise ValueError("kernel must be one of 'linear', 'rbf', or 'poly'")
 
+        self.task = task
         self.kernel = kernel
         self.C = C
         self.gamma = gamma
@@ -89,31 +96,71 @@ class SVMModel:
             X_scaled = self._scaler.fit_transform(X)
         else:
             X_scaled = X
-
-        if self.tune_hyperparameters:
-            print(f"Starting hyperparameter tuning for {self.kernel} kernel...")
-            best_model, best_params, best_score = tune_svm_hyperparameters(
-                X_scaled, y, kernel = self.kernel, cv_folds=self.cv_folds, random_state=self.random_state
-            )
-            self.model = best_model
-            self.best_params_ = best_params
-            self.best_cv_score_ = best_score
-            print("Hyperparameter tuning complete. Model trained with best parameters.")
         
-        else:
-            print(f"Training SVM model with kernel='{self.kernel}', C={self.C}, gamma='{self.gamma}', degree={self.degree}...")
-            svm_params = {'random_state': self.random_state, 'probability': True, 'class_weight' : 'balanced'}
-            if self.kernel == 'linear':
-                svm_params.update({'kernel': 'linear', 'C': self.C})
-            elif self.kernel == 'rbf':
-                svm_params.update({'kernel': 'rbf', 'C': self.C, 'gamma': self.gamma})
-            elif self.kernel == 'poly':
-                svm_params.update({'kernel': 'poly', 'C': self.C, 'gamma': self.gamma,
-                                   'degree': self.degree, 'coef0': self.coef0})
+        print(f"Training a {self.task} model...")
+        
+        if self.task == 'regression':
+            if self.tune_hyperparameters:
+                print(f"Starting hyperparameter tuning for {self.kernel} kernel...")
+                best_model, best_params, best_score = tune_svm_regressor_hyperparameters(
+                    X_scaled, 
+                    y, 
+                    kernel = self.kernel, 
+                    cv_folds=self.cv_folds, 
+                    random_state=self.random_state
+                )
+                self.model = best_model
+                self.best_params_ = best_params
+                self.best_cv_score_ = best_score
+                print("Hyperparameter tuning complete. Training final model with best parameters.")
+            
+            else:
+                print(f"Training SVR {self.task} model with kernel='{self.kernel}', C={self.C}, gamma='{self.gamma}', degree={self.degree}...")
+                svm_params = {}
+                if self.kernel == 'linear':
+                    svm_params.update({'C': self.C})
+                    self.model = LinearSVR(**svm_params)
+                    self.model.fit(X_scaled, y)
+                else:
+                    if self.kernel == 'rbf':
+                        svm_params.update({'kernel': 'rbf', 'C': self.C, 'gamma': self.gamma, 'shrinking': False})
+                    elif self.kernel == 'poly':
+                        svm_params.update({'kernel': 'poly', 'C': self.C, 'gamma': self.gamma,
+                                            'degree': self.degree, 'coef0': self.coef0, 'shrinking': False})
+                        self.model = SVR(**svm_params)
+                        self.model.fit(X_scaled, y)
+                        
+                print("Model training complete.")
+        
+        elif self.task == 'classification':
 
-            self.model = SVC(**svm_params)
-            self.model.fit(X_scaled, y)
-            print("Model training complete.")
+            if self.tune_hyperparameters:
+                print(f"Starting hyperparameter tuning for {self.kernel} kernel...")
+                best_model, best_params, best_score = tune_svm_classifier_hyperparameters(
+                    X_scaled, 
+                    y, kernel = self.kernel, 
+                    cv_folds=self.cv_folds, 
+                    random_state=self.random_state
+                )
+                self.model = best_model
+                self.best_params_ = best_params
+                self.best_cv_score_ = best_score
+                print("Hyperparameter tuning complete. Model trained with best parameters.")
+            
+            else:
+                print(f"Training SVC {self.task} model with kernel='{self.kernel}', C={self.C}, gamma='{self.gamma}', degree={self.degree}...")
+                svm_params = {'random_state': self.random_state, 'probability': True, 'class_weight' : 'balanced'}
+                if self.kernel == 'linear':
+                    svm_params.update({'kernel': 'linear', 'C': self.C})
+                elif self.kernel == 'rbf':
+                    svm_params.update({'kernel': 'rbf', 'C': self.C, 'gamma': self.gamma})
+                elif self.kernel == 'poly':
+                    svm_params.update({'kernel': 'poly', 'C': self.C, 'gamma': self.gamma,
+                                    'degree': self.degree, 'coef0': self.coef0})
+
+                self.model = SVC(**svm_params)
+                self.model.fit(X_scaled, y)
+                print("Model training complete.")
 
     def predict(self, features):
         """
@@ -169,20 +216,33 @@ class SVMModel:
         """
         if self.model is None:
             return "Model not trained yet."
-
+        
         details = {
-            "kernel": self.kernel,
-            "tuned_hyperparameters": self.tune_hyperparameters
+                "kernel": self.kernel,
+                "tuned_hyperparameters": self.tune_hyperparameters
         }
-        if self.tune_hyperparameters:
-            details["best_parameters"] = self.best_params_
-            details["best_cv_score (accuracy)"] = self.best_cv_score_
-        else:
-            details["parameters"] = self.model.get_params()
+        
+        if self.task == 'classification':
+            if self.tune_hyperparameters:
+                details["best_parameters"] = self.best_params_
+                details["best_cv_score (accuracy)"] = self.best_cv_score_
+            else:
+                details["parameters"] = self.model.get_params()
 
-        if self.scale_features and self._scaler:
-            details["feature_scaling_mean"] = self._scaler.mean_
-            details["feature_scaling_scale"] = self._scaler.scale_
+            if self.scale_features and self._scaler:
+                details["feature_scaling_mean"] = self._scaler.mean_
+                details["feature_scaling_scale"] = self._scaler.scale_
+        
+        elif self.task == 'regression':
+            if self.tune_hyperparameters:
+                details["best_parameters"] = self.best_params_
+                details["best_cv_score (MAE)"] = self.best_cv_score_
+            else:
+                details["parameters"] = self.model.get_params()
+
+            if self.scale_features and self._scaler:
+                details["feature_scaling_mean"] = self._scaler.mean_
+                details["feature_scaling_scale"] = self._scaler.scale_
 
         return details
 
@@ -216,7 +276,7 @@ class SVMModel:
             if not all(k in saved_data for k in ['model', 'scaler', 'kernel', 'scale_features']):
                 raise ValueError("Loaded model file is missing required components.")
 
-            # Create an instance of SVMModel. Some parameters are placeholders as they are overwritten.
+            # Create an instance of SVM_Classifier. Some parameters are placeholders as they are overwritten.
             instance = cls(kernel=saved_data['kernel'],
                            tune_hyperparameters=bool(saved_data.get('best_params_')), # Infer if tuning was done
                            scale_features=saved_data['scale_features'])
