@@ -1,6 +1,6 @@
 import pandas as pd
 import numpy as np
-from sklearn.svm import LinearSVR, SVR, SVC
+from sklearn.svm import LinearSVR, SVR, LinearSVC, SVC
 from sklearn.preprocessing import StandardScaler
 # from sklearn.pipeline import Pipeline
 from .tuner import tune_svm_regressor_hyperparameters, tune_svm_classifier_hyperparameters
@@ -149,17 +149,23 @@ class SVMTrainer:
             
             else:
                 print(f"Training SVC {self.task} model with kernel='{self.kernel}', C={self.C}, gamma='{self.gamma}', degree={self.degree}...")
-                svm_params = {'random_state': self.random_state, 'probability': True, 'class_weight' : 'balanced'}
+                svm_params = {'random_state': self.random_state, 
+                              'probability': True, 
+                              'class_weight' : 'balanced'}
+                
                 if self.kernel == 'linear':
-                    svm_params.update({'kernel': 'linear', 'C': self.C})
-                elif self.kernel == 'rbf':
-                    svm_params.update({'kernel': 'rbf', 'C': self.C, 'gamma': self.gamma})
-                elif self.kernel == 'poly':
-                    svm_params.update({'kernel': 'poly', 'C': self.C, 'gamma': self.gamma,
-                                    'degree': self.degree, 'coef0': self.coef0})
-
-                self.model = SVC(**svm_params)
-                self.model.fit(X_scaled, y)
+                    svm_params.update({'C': self.C})
+                    self.model = LinearSVC(**svm_params)
+                    self.model.fit(X_scaled, y)
+                else:
+                    if self.kernel == 'rbf':
+                        svm_params.update({'kernel': 'rbf', 'C': self.C, 'gamma': self.gamma})
+                    elif self.kernel == 'poly':
+                        svm_params.update({'kernel': 'poly', 'C': self.C, 'gamma': self.gamma,
+                                            'degree': self.degree, 'coef0': self.coef0})
+                    self.model = SVC(**svm_params)
+                    self.model.fit(X_scaled, y)
+                
                 print("Model training complete.")
 
     def predict(self, features):
